@@ -10,12 +10,7 @@
 
 #include "MultigridSolver.h"
 
-MultigridSolver::MultigridSolver()
-{
-    _nowstep = 0;
-}
-
-MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0 = 0, double u1 = 0, double tol = 1e-6, int maxstep = 30)
+MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0, double u1, double tol, int maxstep)
 {
     _n = n;
     int total_length = (int)(pow(2, n + 1)) + n - 2;
@@ -27,7 +22,7 @@ MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<doubl
     }
     _f = std::vector<double>(total_length - solution_length, 0);
     _f.insert(_f.end(), _f.begin(), _f.end());
-    if (v.size != solution_length)
+    if (v.size() != solution_length)
     {
 	std::cerr << "Error!" << std::endl;
 	exit(-1);
