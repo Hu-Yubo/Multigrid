@@ -16,21 +16,30 @@ class RestrictionOperator
 {
 protected:
     std::vector<double> _Input;
+    std::vector<double> _Output;
 public:
+    RestrictionOperator();
     RestrictionOperator(std::vector<double> a);
     void PrintInput();
+    void PrintOutput();
+    void SetInput(std::vector<double> a);
+    std::vector<double> ReturnOutput();
+    virtual void PrintType();
+    virtual void restrict();
 };
 
 class InjectionRestriction : public RestrictionOperator
 {
 public:
-    std::vector<double> restrict();
+    void restrict();
+    void PrintType();
 };
 
 class FullWeightingRestriction : public RestrictionOperator
 {
 public:
-    std::vector<double> restrict();
+    void restrict();
+    void PrintType();
 };
     
 

@@ -10,7 +10,7 @@
 
 #include "MultigridSolver.h"
 
-MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0, double u1, double tol, int maxstep)
+MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0, double u1, double tol, int maxstep, std::string S)
 {
     _n = n;
     int total_length = (int)(pow(2, _n + 1)) + _n - 2;
@@ -34,6 +34,14 @@ MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<doubl
     _tol = tol;
     _maxstep = maxstep;
     _nowstep = 0;
+    if (S == "FullWeighting")
+    {
+        _pRestrictOP = new FullWeightingRestriction();
+    }
+    else if (S == "Injection")
+    {
+	_pRestrictOP = new InjectionRestriction();
+    }
 }
 
 void MultigridSolver::SetGridLevel(int n)
@@ -91,4 +99,10 @@ void MultigridSolver::PrintInfo()
     std::cout << "The tolerance: " << _tol << std::endl;
     std::cout << "The upper limit of iteration steps: " << _maxstep << std::endl;
     std::cout << "The iteration steps have done: " << _nowstep << std::endl;
+    _pRestrictOP -> PrintType();
+}
+
+RestrictionOperator* MultigridSolver::pRestrictOP()
+{
+    return _pRestrictOP;
 }

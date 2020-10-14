@@ -10,9 +10,14 @@
 
 #include "RestrictionOperator.h"
 
+RestrictionOperator::RestrictionOperator()
+{
+}
+
 RestrictionOperator::RestrictionOperator(std::vector<double> a)
 {
     _Input = a;
+    _Output = std::vector<double> ((_Input.size()+1)/2);
 }
 
 void RestrictionOperator::PrintInput()
@@ -22,26 +27,58 @@ void RestrictionOperator::PrintInput()
 	std::cout << *idx << " "; 
 }
 
-std::vector<double> InjectionRestriction::restrict()
+void RestrictionOperator::PrintOutput()
 {
-    int n = _Input.size();
-    std::vector<double> Output((n+1)/2);
-    for (int i = 0; i < Output.size(); i++)
-    {
-	Output[i] = _Input[2*i];
-    }
-    return Output;
+    std::vector<double>::iterator idx;
+    for (idx = _Output.begin(); idx != _Output.end(); ++idx)
+	std::cout << *idx << " "; 
 }
 
-std::vector<double> FullWeightingRestriction::restrict()
+void RestrictionOperator::SetInput(std::vector<double> a)
+{
+    _Input = a;
+    _Output = std::vector<double> ((_Input.size()+1)/2);
+}
+
+std::vector<double> RestrictionOperator::ReturnOutput()
+{
+    return _Output;
+}
+
+void RestrictionOperator::PrintType()
+{
+    std::cout << "No type" << std::endl;
+}
+
+void RestrictionOperator::restrict()
+{
+    std::cerr << "Restriction Error!" << std::endl;
+    exit(-1);
+}
+
+void InjectionRestriction::restrict()
+{
+    for (int i = 0; i < _Output.size(); i++)
+	_Output[i] = _Input[2*i];
+}
+
+void InjectionRestriction::PrintType()
+{
+    std::cout << "The type of restriction operator: Injection" << std::endl;
+}
+
+void FullWeightingRestriction::restrict()
 {
     int n = _Input.size();
-    std::vector<double> Output((n+1)/2);
-    Output[0] = _Input[0];
-    Output[(n+1)/2-1] = _Input[n-1];
+    _Output[0] = _Input[0];
+    _Output[(n+1)/2-1] = _Input[n-1];
     for (int i = 1; i < (n-1)/2; i++)
     {
-	Output[i] = (_Input[2*i-1] + 2 * _Input[2*i] + _Input[2*i+1]);
+	_Output[i] = (_Input[2*i-1] + 2 * _Input[2*i] + _Input[2*i+1]);
     }
-    return Output;
+}
+
+void FullWeightingRestriction::PrintType()
+{
+    std::cout << "The type of restriction operator: Full-weighting" << std::endl;
 }
