@@ -1,6 +1,13 @@
+source = $(wildcard *.cpp)
+object = $(patsubst %.cpp, %.o, $(source))
 
+main: $(object)
+	g++ -o $@ $^		
 
-main: MultigridSolver.cpp main.cpp
-	g++ -o main MultigridSolver.cpp main.cpp
-clean:
-	rm main
+.cpp.o:
+	g++ -c -o $@ $<
+
+clean :
+	-rm -rf $(object)
+	-rm -rf main
+
