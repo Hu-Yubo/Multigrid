@@ -10,7 +10,7 @@
 
 #include "MultigridSolver.h"
 
-MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0, double u1, double tol, int maxstep, std::string S)
+MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0, double u1, double tol, int maxstep, std::string S1, std::string S2)
 {
     _n = n;
     int total_length = (int)(pow(2, _n + 1)) + _n - 2;
@@ -34,13 +34,17 @@ MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<doubl
     _tol = tol;
     _maxstep = maxstep;
     _nowstep = 0;
-    if (S == "FullWeighting")
+    if (S1 == "FullWeighting")
     {
         _pRestrictOP = new FullWeightingRestriction();
     }
-    else if (S == "Injection")
+    else if (S2 == "Injection")
     {
 	_pRestrictOP = new InjectionRestriction();
+    }
+    if (S2 == "Linear")
+    {
+	_pInterpolateOP = new LinearInterpolation();
     }
 }
 
@@ -91,6 +95,18 @@ void MultigridSolver::SetMaxStep(int maxstep)
     _maxstep = maxstep;
 }
 
+void MultigridSolver::SetRestrictionType(std::string S)
+{
+    if (S == "FullWeighting")
+    {
+        _pRestrictOP = new FullWeightingRestriction();
+    }
+    else if (S == "Injection")
+    {
+	_pRestrictOP = new InjectionRestriction();
+    }
+}
+
 void MultigridSolver::PrintInfo()
 {
     std::cout << "The total level: " << _n << std::endl;
@@ -105,4 +121,9 @@ void MultigridSolver::PrintInfo()
 RestrictionOperator* MultigridSolver::pRestrictOP()
 {
     return _pRestrictOP;
+}
+
+InterpolationOperator* MultigridSolver::pInterpolateOP()
+{
+    return _pInterpolateOP;
 }

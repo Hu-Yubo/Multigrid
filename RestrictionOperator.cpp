@@ -24,14 +24,16 @@ void RestrictionOperator::PrintInput()
 {
     std::vector<double>::iterator idx;
     for (idx = _Input.begin(); idx != _Input.end(); ++idx)
-	std::cout << *idx << " "; 
+	std::cout << *idx << " ";
+    std::cout << std::endl;
 }
 
 void RestrictionOperator::PrintOutput()
 {
     std::vector<double>::iterator idx;
     for (idx = _Output.begin(); idx != _Output.end(); ++idx)
-	std::cout << *idx << " "; 
+	std::cout << *idx << " ";
+    std::cout << std::endl;
 }
 
 void RestrictionOperator::SetInput(std::vector<double> a)
