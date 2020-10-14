@@ -7,3 +7,4 @@ int main(int argc, char* argv[])
     int n = 4;
     MultigridSolver Solver(n, f, v);
     Solver.PrintInfo();
+}

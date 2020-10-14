@@ -18,7 +18,7 @@ RestrictionOperator::RestrictionOperator(std::vector<double> a)
 void RestrictionOperator::PrintInput()
 {
     std::vector<double>::iterator idx;
-    for (idx = _Input.begin(); idx != _Input.end(); ++i)
+    for (idx = _Input.begin(); idx != _Input.end(); ++idx)
 	std::cout << *idx << " "; 
 }
 
