@@ -13,8 +13,8 @@
 MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0, double u1, double tol, int maxstep)
 {
     _n = n;
-    int total_length = (int)(pow(2, n + 1)) + n - 2;
-    int solution_length = (int)(pow(2, n)) + 1;
+    int total_length = (int)(pow(2, _n + 1)) + _n - 2;
+    int solution_length = (int)(pow(2, _n)) + 1;
     if (f.size() != solution_length)
     {
 	std::cerr << "Error!" << std::endl;
@@ -34,4 +34,61 @@ MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<doubl
     _tol = tol;
     _maxstep = maxstep;
     _nowstep = 0;
+}
+
+void MultigridSolver::SetGridLevel(int n)
+{
+    _n = n;
+}
+
+void MultigridSolver::SetRightSide(std::vector<double> f)
+{
+    int total_length = (int)(pow(2, _n + 1)) + _n - 2;
+    int solution_length = (int)(pow(2, _n)) + 1;
+    if (f.size() != solution_length)
+    {
+	std::cerr << "Error!" << std::endl;
+	exit(-1);
+    }
+    _f = std::vector<double>(total_length - solution_length, 0);
+    _f.insert(_f.end(), _f.begin(), _f.end());
+}
+
+void MultigridSolver::SetInitialGuess(std::vector<double> v)
+{
+    int total_length = (int)(pow(2, _n + 1)) + _n - 2;
+    int solution_length = (int)(pow(2, _n)) + 1;
+    if (v.size() != solution_length)
+    {
+	std::cerr << "Error!" << std::endl;
+	exit(-1);
+    }
+    _v = std::vector<double>(total_length - solution_length, 0);
+    _v.insert(_v.end(), _v.begin(), _v.end());
+}
+
+void MultigridSolver::SetBoundaryCond(double u0, double u1)
+{
+    _u0 = u0;
+    _u1 = u1;
+}
+
+void MultigridSolver::SetTolerance(double tol)
+{
+    _tol = tol;
+}
+
+void MultigridSolver::SetMaxStep(int maxstep)
+{
+    _maxstep = maxstep;
+}
+
+void MultigridSolver::PrintInfo()
+{
+    std::cout << "The total level: " << _n << std::endl;
+    std::cout << "The length of f, v:" << _f.size() << " " << _v.size() << std::endl;
+    std::cout << "The boundary condition: " << _u0 << " " << _u1 << std::endl;
+    std::cout << "The tolerance: " << _tol << std::endl;
+    std::cout << "The upper limit of iteration steps: " << _maxstep << std::endl;
+    std::cout << "The iteration steps have done: " << _nowstep << std::endl;
 }

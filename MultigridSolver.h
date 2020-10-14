@@ -12,10 +12,11 @@
 #include <vector>
 #include <math.h>
 #include <fstream>
+#include <string>
 
 class MultigridSolver
 {
-public:
+private:
     /// the total level of multigrid method
     int _n;
     /// the collection of right side
@@ -29,18 +30,22 @@ public:
     /// the upper limit of iteration steps
     int _maxstep;
     /// the iteration steps have done
-    int _nowstep;
+    int _nowstep = 0;
+    /// the key words to judge restriction method
+    std::string RestrictMethod;
+    
 
-
+public:
     MultigridSolver();
     MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0 = 0,
 		    double u1 = 0, double tol = 1e-6, int maxstep = 30);
-    SetGridLevel(int n);
-    SetRightSide(std::vector<double> f);
-    SetInitialGuess(std::vector<double> v);
-    SetBoundaryCond(double u0, double u1);
-    SetTolerance(double tol);
-    SetMaxStep(int maxstep);
+    void SetGridLevel(int n);
+    void SetRightSide(std::vector<double> f);
+    void SetInitialGuess(std::vector<double> v);
+    void SetBoundaryCond(double u0, double u1);
+    void SetTolerance(double tol);
+    void SetMaxStep(int maxstep);
+    void PrintInfo();
     
 
     
