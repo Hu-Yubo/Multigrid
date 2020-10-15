@@ -31,13 +31,16 @@ private:
     double _tol;
     /// the upper limit of iteration steps
     int _maxstep;
-    /// the iteration steps have done
-    int _nowstep = 0;
+    /// the level where MG is proceeding now
+    int _nowlevel = 0;
     /// the pointer of restriction operator
     RestrictionOperator* _pRestrictOP;
     /// the pointer of interation operator
     InterpolationOperator* _pInterpolateOP;
-    
+    /// the start and end index of f/v proceeding in this step
+    std::vector<int> _Idx;
+    /// the weight of WeightedJacobi
+    double _w = 2/3;
 
 public:
     MultigridSolver();
@@ -51,9 +54,14 @@ public:
     void SetTolerance(double tol);
     void SetMaxStep(int maxstep);
     void SetRestrictionType(std::string S);
+    void SetNowLevel(int nowlevel);
     void PrintInfo();
     RestrictionOperator* pRestrictOP();
     InterpolationOperator* pInterpolateOP();
+    void UpdateIndex();
+    void PrintIdx();
+    void WeightedJacobi();
+    
 
     
 };

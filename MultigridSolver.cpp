@@ -33,7 +33,7 @@ MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<doubl
     _u1 = u1;
     _tol = tol;
     _maxstep = maxstep;
-    _nowstep = 0;
+    _nowlevel = 0;
     if (S1 == "FullWeighting")
     {
         _pRestrictOP = new FullWeightingRestriction();
@@ -46,6 +46,7 @@ MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<doubl
     {
 	_pInterpolateOP = new LinearInterpolation();
     }
+    _Idx = std::vector<int>(2,0);
 }
 
 void MultigridSolver::SetGridLevel(int n)
@@ -107,6 +108,11 @@ void MultigridSolver::SetRestrictionType(std::string S)
     }
 }
 
+void MultigridSolver::SetNowLevel(int nowlevel)
+{
+    _nowlevel = nowlevel;
+}
+
 void MultigridSolver::PrintInfo()
 {
     std::cout << "The total level: " << _n << std::endl;
@@ -114,8 +120,8 @@ void MultigridSolver::PrintInfo()
     std::cout << "The boundary condition: " << _u0 << " " << _u1 << std::endl;
     std::cout << "The tolerance: " << _tol << std::endl;
     std::cout << "The upper limit of iteration steps: " << _maxstep << std::endl;
-    std::cout << "The iteration steps have done: " << _nowstep << std::endl;
     _pRestrictOP -> PrintType();
+    _pInterpolateOP->PrintType();
 }
 
 RestrictionOperator* MultigridSolver::pRestrictOP()
@@ -126,4 +132,20 @@ RestrictionOperator* MultigridSolver::pRestrictOP()
 InterpolationOperator* MultigridSolver::pInterpolateOP()
 {
     return _pInterpolateOP;
+}
+
+void MultigridSolver::UpdateIndex()
+{
+    _Idx[0] = (int)(pow(2, _n - _nowlevel + 1)) - 2 + _n - _nowlevel;
+    _Idx[1] = _Idx[0] + (int)(pow(2, _n - _nowlevel + 1)); 
+}
+void MultigridSolver::PrintIdx()
+{
+    std::cout << _Idx[0] << " " << _Idx[1] << std::endl;
+}
+
+void MultigridSolver::WeightedJacobi()
+{
+    std::vector<double> v_star(_Idx[1] - _Idx[0] + 1);
+    
 }
