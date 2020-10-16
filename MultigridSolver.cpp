@@ -171,9 +171,11 @@ void MultigridSolver::VCycle()
 	for (int i = _Idx[0]; i <= _Idx[1]; i++)
 	{
 	    if (i == _Idx[0])
-		r_h.push_back(_f[i] - (2*_v[i] - _v[i+1])/_h/_h);
+		///r_h.push_back(_f[i] - (2*_v[i] - _v[i+1])/_h/_h);
+		r_h.push_back(0);
 	    else if (i == _Idx[1])
-		r_h.push_back(_f[i] - (2*_v[i] - _v[i-1])/_h/_h);
+	       	///r_h.push_back(_f[i] - (2*_v[i] - _v[i-1])/_h/_h);
+		r_h.push_back(0);
 	    else
 		r_h.push_back(_f[i] - (2*_v[i] - _v[i-1]- _v[i+1])/_h/_h);
 	}
@@ -216,7 +218,7 @@ void MultigridSolver::Solve()
 {
     UpdateIndex();
     std::vector<double> all0(_Idx[0], 0);
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 10; i++)
     {
 	_v.erase(_v.begin(), _v.begin()+_Idx[0]);
 	_v.insert(_v.begin(), all0.begin(), all0.end());

@@ -4,7 +4,7 @@
 
 int main(int argc, char* argv[])
 {
-    int n = 3;
+    int n = 4;
     int a = (int)(pow(2,n));
     std::vector<double> v(a+1,0);
     std::vector<double> f(a+1,0);
