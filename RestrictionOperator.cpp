@@ -76,7 +76,7 @@ void FullWeightingRestriction::restrict()
     _Output[(n+1)/2-1] = _Input[n-1];
     for (int i = 1; i < (n-1)/2; i++)
     {
-	_Output[i] = (_Input[2*i-1] + 2 * _Input[2*i] + _Input[2*i+1]);
+	_Output[i] = (_Input[2*i-1] + 2 * _Input[2*i] + _Input[2*i+1])/4;
     }
 }
 

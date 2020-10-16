@@ -2,10 +2,10 @@ source = $(wildcard *.cpp)
 object = $(patsubst %.cpp, %.o, $(source))
 
 main: $(object)
-	g++ -o $@ $^		
+	g++ -g -o $@ $^ 		
 
 .cpp.o:
-	g++ -c -o $@ $<
+	g++ -g -c -o $@ $<
 
 clean :
 	-rm -rf $(object)

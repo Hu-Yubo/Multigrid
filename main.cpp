@@ -1,13 +1,18 @@
 #include "MultigridSolver.h"
 
+#define PI (4.0 * atan(1.0))
+
 int main(int argc, char* argv[])
 {
-    std::vector<double> v(17,0);
-    std::vector<double> f(17,0);
-    int n = 4;
+    int n = 3;
+    int a = (int)(pow(2,n));
+    std::vector<double> v(a+1,0);
+    std::vector<double> f(a+1,0);
+    for (int i = 0; i < a+1; i++)
+	f[i] = PI * PI * sin(PI * i / a);
     MultigridSolver Solver(n, f, v);
-    Solver.PrintInfo();
     /*
+    Solver.PrintInfo();
     double a[9] = {0, 0.7071, -1.0000, 0.7071, 0.0000,-0.7071, 1.0000, -0.7071, -0.0000};
     std::vector<double> A(a,a+9);
     Solver.pRestrictOP()->SetInput(A);
@@ -21,17 +26,22 @@ int main(int argc, char* argv[])
     Solver.pInterpolateOP()->PrintInput();
     Solver.pInterpolateOP()->PrintOutput();
     */
-    Solver.PrintIdx();
-    Solver.SetNowLevel(1);
-    Solver.UpdateIndex();
-    Solver.PrintIdx();
-    Solver.SetNowLevel(2);
-    Solver.UpdateIndex();
-    Solver.PrintIdx();
-    Solver.SetNowLevel(3);
-    Solver.UpdateIndex();
-    Solver.PrintIdx();
-    Solver.SetNowLevel(4);
-    Solver.UpdateIndex();
-    Solver.PrintIdx();
+    std::vector<double> AS;
+    /*
+    for (int j = 0; j < 5; j++)
+    {
+	Solver.VCycle();
+	AS = Solver.ReturnSolution();
+	double e = 0;
+	for (int i = 0; i < a; i++)
+	    e = e + pow((AS[i] - sin(PI * i / a)), 2);
+	std::cout << sqrt(e) << std::endl;
+	}*/
+    Solver.Solve();
+    AS = Solver.ReturnSolution();
+    double e = 0;
+    for (int i = 0; i < a; i++)
+	e = e + pow((AS[i] - sin(PI * i / a)), 2);
+    std::cout << sqrt(e) << std::endl;
+    return 0;
 }

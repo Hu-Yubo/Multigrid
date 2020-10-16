@@ -21,6 +21,8 @@ class MultigridSolver
 private:
     /// the total level of multigrid method
     int _n;
+    /// the length of each unit
+    double _h;
     /// the collection of right side
     std::vector<double> _f;
     /// the collection of approximate solution
@@ -32,7 +34,7 @@ private:
     /// the upper limit of iteration steps
     int _maxstep;
     /// the level where MG is proceeding now
-    int _nowlevel = 0;
+    int _nowlevel = 1;
     /// the pointer of restriction operator
     RestrictionOperator* _pRestrictOP;
     /// the pointer of interation operator
@@ -40,7 +42,9 @@ private:
     /// the start and end index of f/v proceeding in this step
     std::vector<int> _Idx;
     /// the weight of WeightedJacobi
-    double _w = 2/3;
+    double _w = 2.0/3;
+    /// the times of Relaxtion
+    int _RlxTimes = 10;
 
 public:
     MultigridSolver();
@@ -61,6 +65,10 @@ public:
     void UpdateIndex();
     void PrintIdx();
     void WeightedJacobi();
+    void BottomSolve();
+    void VCycle();
+    void Solve();
+    std::vector<double> ReturnSolution();
     
 
     
