@@ -1,31 +1,21 @@
 #include "MultigridSolver.h"
 
-#define PI (4.0 * atan(1.0))
-
 int main(int argc, char* argv[])
 {
-    int n = 4;
+    int n = 10;
     int a = (int)(pow(2,n));
     std::vector<double> v(a+1,0);
     std::vector<double> f(a+1,0);
+    std::vector<double> x;
+    for (double i = 0; i < a+1; i++)
+    {
+	x.push_back(double(i/a));
+    }
     for (int i = 0; i < a+1; i++)
-	f[i] = PI * PI * sin(PI * i / a);
-    MultigridSolver Solver(n, f, v);
-    /*
-    Solver.PrintInfo();
-    double a[9] = {0, 0.7071, -1.0000, 0.7071, 0.0000,-0.7071, 1.0000, -0.7071, -0.0000};
-    std::vector<double> A(a,a+9);
-    Solver.pRestrictOP()->SetInput(A);
-    Solver.pRestrictOP()->restrict();
-    Solver.pRestrictOP()->PrintType();
-    Solver.pRestrictOP()->PrintInput();
-    Solver.pRestrictOP()->PrintOutput();
-    Solver.pInterpolateOP()->SetInput(A);
-    Solver.pInterpolateOP()->interpolate();
-    Solver.pInterpolateOP()->PrintType();
-    Solver.pInterpolateOP()->PrintInput();
-    Solver.pInterpolateOP()->PrintOutput();
-    */
+	/// f[i] = PI * PI * sin(PI * i / a);
+	f[i] = (sin(x[i])-cos(x[i])*cos(x[i]))*exp(sin(x[i]));
+    /// MultigridSolver Solver(n, f, v);
+    MultigridSolver Solver(n, f, v, 1, exp(sin(1.0)));
     std::vector<double> AS;
     /*
     for (int j = 0; j < 5; j++)
@@ -39,9 +29,17 @@ int main(int argc, char* argv[])
 	}*/
     Solver.Solve();
     AS = Solver.ReturnSolution();
+    /*
+    for (int i = 0; i < AS.size();i++)
+    {
+	std::cout << AS[i] << " ";
+    }
+    /*
+    AS = Solver.ReturnSolution();
     double e = 0;
     for (int i = 0; i < a; i++)
 	e = e + pow((AS[i] - sin(PI * i / a)), 2);
     std::cout << sqrt(e) << std::endl;
+    */
     return 0;
 }

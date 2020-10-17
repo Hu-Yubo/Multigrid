@@ -16,6 +16,8 @@
 #include <fstream>
 #include <string>
 
+#define PI (4.0 * atan(1.0))
+
 class MultigridSolver
 {
 private:
@@ -48,9 +50,7 @@ private:
 
 public:
     MultigridSolver();
-    MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0 = 0,
-		    double u1 = 0, double tol = 1e-6, int maxstep = 30,
-		    std::string S1 = "FullWeighting", std::string S2 = "Linear");
+    MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0 = 0, double u1 = 0, double tol = 1e-6, int maxstep = 30, std::string S1 = "FullWeighting", std::string S2 = "Linear");
     void SetGridLevel(int n);
     void SetRightSide(std::vector<double> f);
     void SetInitialGuess(std::vector<double> v);

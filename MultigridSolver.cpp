@@ -200,18 +200,20 @@ void MultigridSolver::VCycle()
 	UpdateIndex();
 	for (int i = _Idx[0]; i <= _Idx[1]; i++)
 	    _v[i] = _v[i] + r_h[i-_Idx[0]];
-	for (int i = 0; i < _RlxTimes; i++)
+	for (int i = 0; i < 1; i++)
 	    WeightedJacobi();
     }
 }
 
 void MultigridSolver::BottomSolve()
 {
-    _v[1] = (_f[0] + _f[2] + 2 * _f[1]) / 2 * _h * _h;
+    
+    //_v[1] = (_f[0] + _f[2] + 2 * _f[1]) / 2 * _h * _h;
     // _v[0] = (_h * _h * _f[0] + _v[1]) / 2;
     // _v[2] = (_h * _h * _f[2] + _v[1]) / 2;
     _v[0] = 0;
     _v[2] = 0;
+    _v[1] = (_h*_h*_f[1]-_v[0]-_v[2])/2;
 }
 
 void MultigridSolver::Solve()
@@ -222,9 +224,17 @@ void MultigridSolver::Solve()
     {
 	_v.erase(_v.begin(), _v.begin()+_Idx[0]);
 	_v.insert(_v.begin(), all0.begin(), all0.end());
+	_v[_Idx[0]] = _u0;
+	_v[_Idx[1]] = _u1;
 	_f.erase(_f.begin(), _f.begin()+_Idx[0]);
 	_f.insert(_f.begin(), all0.begin(), all0.end());
 	VCycle();
+	double e = 0;
+	int a = (int)pow(2, _n);
+	for (int i = 0; i <= a; i++)
+	    /// e = e + pow((_v[i+_Idx[0]] - sin(PI * i * _h)), 2);
+	    e = e + pow((_v[i+_Idx[0]] - exp(sin(i * _h))), 2);
+	std::cout << sqrt(e) << std::endl;
     }
 }
 
