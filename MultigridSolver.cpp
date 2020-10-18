@@ -10,7 +10,7 @@
 
 #include "MultigridSolver.h"
 
-MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0, double u1, double tol, int maxstep, std::string S1, std::string S2)
+MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0, double u1, double tol, int maxstep, std::string S1, std::string S2, std::string S3)
 {
     _n = n;
     _h = 1.0/pow(2, _n);
@@ -49,6 +49,7 @@ MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<doubl
     }
     _Idx = std::vector<int>(2,0);
     _w = 2.0/3;
+    _TypeofCycle = S3;
 }
 
 void MultigridSolver::SetGridLevel(int n)
@@ -157,11 +158,12 @@ void MultigridSolver::WeightedJacobi()
 	_v[i+_Idx[0]] = _v[i+_Idx[0]] + _w * (v_star[i] - _v[i+_Idx[0]]);
 }
 
-void MultigridSolver::VCycle()
+void MultigridSolver::VCycle(int StartLevel)
 {
+    _nowlevel = StartLevel;
     UpdateIndex();
     if (_nowlevel == _n)
-	BottomSolve();
+	BottomSolve(0, 0);
     else
     {
 	for (int i = 0; i < _RlxTimes; i++)
@@ -171,10 +173,8 @@ void MultigridSolver::VCycle()
 	for (int i = _Idx[0]; i <= _Idx[1]; i++)
 	{
 	    if (i == _Idx[0])
-		///r_h.push_back(_f[i] - (2*_v[i] - _v[i+1])/_h/_h);
 		r_h.push_back(0);
 	    else if (i == _Idx[1])
-	       	///r_h.push_back(_f[i] - (2*_v[i] - _v[i-1])/_h/_h);
 		r_h.push_back(0);
 	    else
 		r_h.push_back(_f[i] - (2*_v[i] - _v[i-1]- _v[i+1])/_h/_h);
@@ -191,7 +191,7 @@ void MultigridSolver::VCycle()
 	r_2h.assign(_Idx[1]-_Idx[0]+1, 0);
 	_v.erase(_v.begin()+_Idx[0], _v.begin()+_Idx[1]+1);
 	_v.insert(_v.begin() + _Idx[0], r_2h.begin(), r_2h.end());
-	VCycle();
+	VCycle(_nowlevel);
 	r_2h.assign(_v.begin()+_Idx[0], _v.begin()+_Idx[1]+1);
 	_pInterpolateOP->SetInput(r_2h);
 	_pInterpolateOP->interpolate();
@@ -200,20 +200,16 @@ void MultigridSolver::VCycle()
 	UpdateIndex();
 	for (int i = _Idx[0]; i <= _Idx[1]; i++)
 	    _v[i] = _v[i] + r_h[i-_Idx[0]];
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 10; i++)
 	    WeightedJacobi();
     }
 }
 
-void MultigridSolver::BottomSolve()
+void MultigridSolver::BottomSolve(double u0, double u1)
 {
-    
-    //_v[1] = (_f[0] + _f[2] + 2 * _f[1]) / 2 * _h * _h;
-    // _v[0] = (_h * _h * _f[0] + _v[1]) / 2;
-    // _v[2] = (_h * _h * _f[2] + _v[1]) / 2;
-    _v[0] = 0;
-    _v[2] = 0;
-    _v[1] = (_h*_h*_f[1]-_v[0]-_v[2])/2;
+    _v[0] = u0;
+    _v[2] = u1;
+    _v[1] = (_h*_h*_f[1]+_v[0]+_v[2])/2;
 }
 
 void MultigridSolver::Solve()
@@ -228,13 +224,46 @@ void MultigridSolver::Solve()
 	_v[_Idx[1]] = _u1;
 	_f.erase(_f.begin(), _f.begin()+_Idx[0]);
 	_f.insert(_f.begin(), all0.begin(), all0.end());
-	VCycle();
+	VCycle(1);
 	double e = 0;
 	int a = (int)pow(2, _n);
 	for (int i = 0; i <= a; i++)
-	    /// e = e + pow((_v[i+_Idx[0]] - sin(PI * i * _h)), 2);
+	    ///e = e + pow((_v[i+_Idx[0]] - sin(PI * i * _h)), 2);
 	    e = e + pow((_v[i+_Idx[0]] - exp(sin(i * _h))), 2);
 	std::cout << sqrt(e) << std::endl;
+    }
+}
+
+void MultigridSolver::FMG()
+{
+    UpdateIndex();
+    if (_nowlevel == _n)
+    {
+	BottomSolve(_u0, _u1);
+    }
+    else
+    {
+	std::vector<double> f_h;
+	std::vector<double> f_2h;
+	f_h.insert(f_h.begin(), _f.begin()+_Idx[0], _f.begin()+_Idx[1]+1);
+	_pRestrictOP->SetInput(f_h);
+	_pRestrictOP->restrict();
+	f_2h = _pRestrictOP->ReturnOutput();
+	_nowlevel++;
+	UpdateIndex();
+	_f.erase(_f.begin()+_Idx[0], _f.begin()+_Idx[1]+1);
+	_f.insert(_f.begin() + _Idx[0], f_2h.begin(), f_2h.end());
+	FMG();
+	f_2h.clear();
+	f_2h.insert(f_2h.begin(), _v.begin()+_Idx[0], _v.begin()+_Idx[1]+1);
+	_pInterpolateOP->SetInput(f_2h);
+	_pInterpolateOP->interpolate();
+	f_h = _pInterpolateOP->ReturnOutput();
+	_nowlevel--;
+	UpdateIndex();
+	_v.erase(_v.begin()+_Idx[0], _v.begin()+_Idx[1]+1);
+	_v.insert(_v.begin() + _Idx[0], f_h.begin(), f_h.end());
+	VCycle(_nowlevel);
     }
 }
 
@@ -244,3 +273,4 @@ std::vector<double> MultigridSolver::ReturnSolution()
     result.insert(result.begin(), _v.begin()+_Idx[0], _v.begin()+_Idx[1]+1);
     return result;
 }
+

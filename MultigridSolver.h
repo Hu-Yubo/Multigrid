@@ -47,10 +47,30 @@ private:
     double _w = 2.0/3;
     /// the times of Relaxtion
     int _RlxTimes = 10;
+    /// the keywords of cycle type
+    std::string _TypeofCycle;
+    
 
 public:
     MultigridSolver();
-    MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0 = 0, double u1 = 0, double tol = 1e-6, int maxstep = 30, std::string S1 = "FullWeighting", std::string S2 = "Linear");
+    /** 
+     * the constructor of MultigridSolver
+     * 
+     * @param n the total numbers of level
+     * @param f the vector which stores the rightside of each level
+     * @param v the vector which stores the approximate solution of each level
+     * @param u0 the left boundary condition
+     * @param u1 the right boundary condition
+     * @param tol 
+     * @param maxstep 
+     * @param S1 the keywords of restriction operator type, 
+     *           "FullWeighting" or "Injection"
+     * @param S2 the keywords of interpolation operator type,
+     *           "Linear" or "Quadratic"
+     * @param S3 the keywords of cycle type
+     *           "VC" or "FMG"
+     */
+    MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0 = 0, double u1 = 0, double tol = 1e-6, int maxstep = 30, std::string S1 = "FullWeighting", std::string S2 = "Linear", std::string S3 = "VC");
     void SetGridLevel(int n);
     void SetRightSide(std::vector<double> f);
     void SetInitialGuess(std::vector<double> v);
@@ -65,8 +85,9 @@ public:
     void UpdateIndex();
     void PrintIdx();
     void WeightedJacobi();
-    void BottomSolve();
-    void VCycle();
+    void BottomSolve(double u0, double u1);
+    void VCycle(int StartLevel);
+    void FMG();
     void Solve();
     std::vector<double> ReturnSolution();
     
