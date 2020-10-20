@@ -41,7 +41,7 @@ private:
     RestrictionOperator* _pRestrictOP;
     /// the pointer of interation operator
     InterpolationOperator* _pInterpolateOP;
-    /// the start and end index of f/v proceeding in this step
+    /// the start and end index of f or v proceeding in this step
     std::vector<int> _Idx;
     /// the weight of WeightedJacobi
     double _w = 2.0/3;
