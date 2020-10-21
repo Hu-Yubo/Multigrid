@@ -40,6 +40,11 @@ MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<doubl
     _TypeofCycle = S3;
 }
 
+int MultigridSolver::CortoIdx(int i, int j)
+{
+    return (i * _SdLen + j);
+}
+
 std::vector<int> MultigridSolver::IsBoundary()
 {
     int size = _SdLen * _SdLen;
@@ -95,7 +100,10 @@ void MultigridSolver::VCycle(int StartLevel)
     _nowlevel = StartLevel;
     UpdateData();
     if (_nowlevel == _n)
-	BottomSolve();
+    {
+	std::vector<double> a(8,0);
+	BottomSolve(a);
+    }
     else
     {
 	for (int i = 0; i < _RlxTimes; i++)
@@ -131,3 +139,40 @@ void MultigridSolver::VCycle(int StartLevel)
 	    WeightedJacobi();
     }
 }
+
+void MultigridSolver::Solve()
+{
+    UpdateData();
+    double RS = 0;
+    for (int i = 0; i < _SdLen; i++)
+	for (int j = 0; j < _SdLen; j++)
+	{
+	    int Idx = CortoIdx(i, j);
+	    RS = RS + pow(sin(PI*i*_h)*sin(PI*j*_h), 2);
+	}
+    RS = sqrt(RS);
+    for(int i = 0; i < 20; i++)
+    {
+	for (int j = 1; j < _n; j++)
+	{
+	    int length = (int)(pow(2, _n - j)) + 1;
+	    _f[j] = std::vector<double>(length * length, 0);
+	    _v[j] = std::vector<double>(length * length, 0);
+	}
+	VCycle(1);
+	double e = 0;
+	for (int a = 0; a < _SdLen; a++)
+	    for (int b = 0; b < _SdLen; b++)
+	    {
+		int Idx = CortoIdx(a, b);
+		e = e + pow((_v[0][Idx] - sin(PI*a*_h)*sin(PI*b*_h)), 2);
+	    }
+	std::cout << sqrt(e) << std::endl;
+    }
+}
+
+std::vector<double> MultigridSolver::ReturnSolution()
+{
+    return _v[0];
+}
+    

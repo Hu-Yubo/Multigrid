@@ -48,7 +48,7 @@ private:
     /// the weight of WeightedJacobi
     double _w = 2.0/3;
     /// the times of Relaxtion
-    int _RlxTimes = 10;
+    int _RlxTimes = 3;
     /// the keywords of cycle type
     std::string _TypeofCycle;
     /// the mark whether this node is boundary
@@ -59,8 +59,9 @@ public:
     MultigridSolver(int n, std::vector<double> f, std::vector<double> v, std::string S1 = "FullWeighting", std::string S2 = "Linear", std::string S3 = "VC");
     std::vector<int> IsBoundary();
     void UpdateData();
+    int CortoIdx(int i, int j);
     void WeightedJacobi();
-    void BottomSolve(std::vector<double> BtmBnd = std::vector<double>(8,0));
+    void BottomSolve(std::vector<double> BtmBnd);
     void VCycle(int StartLevel);
     void Solve();
     void FMG();
