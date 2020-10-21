@@ -1,45 +1,36 @@
 #include "MultigridSolver.h"
 
+double _f(double x)
+{
+    return PI*PI*sin(PI*x);
+}
+
+double _u(double x)
+{
+    return sin(PI*x);
+}
+
 int main(int argc, char* argv[])
 {
-    int n = 10;
+    int n = 9;
     int a = (int)(pow(2,n));
     std::vector<double> v(a+1,0);
     std::vector<double> f(a+1,0);
+    std::vector<double> RS(a+1,0);
     std::vector<double> x;
     for (double i = 0; i < a+1; i++)
     {
 	x.push_back(double(i/a));
     }
     for (int i = 0; i < a+1; i++)
-	///f[i] = PI * PI * sin(PI * i / a);
-	f[i] = (sin(x[i])-cos(x[i])*cos(x[i]))*exp(sin(x[i]));
-    /// MultigridSolver Solver(n, f, v);
-    MultigridSolver Solver(n, f, v, 1, exp(sin(1.0)));
-    std::vector<double> AS;
-    /*
-    for (int j = 0; j < 5; j++)
     {
-	Solver.VCycle();
-	AS = Solver.ReturnSolution();
-	double e = 0;
-	for (int i = 0; i < a; i++)
-	    e = e + pow((AS[i] - sin(PI * i / a)), 2);
-	std::cout << sqrt(e) << std::endl;
-	}*/
-    Solver.FMG();
-    AS = Solver.ReturnSolution();
-    /*
-    for (int i = 0; i < AS.size();i++)
-    {
-	std::cout << AS[i] << " ";
+	if (i == 0 || i == a)
+	    v[i] = _u(x[i]);
+	f[i] = _f(x[i]);
+	RS[i] = _u(x[i]);
     }
-    /*
-    AS = Solver.ReturnSolution();*/
-    double e = 0;
-    for (int i = 0; i < a; i++)
-	///e = e + pow((AS[i] - sin(PI * i / a)), 2);
-	e = e + pow((AS[i] - exp(sin(double(i) / a))), 2);
-    std::cout << sqrt(e) << std::endl;
+    MultigridSolver Solver(n, f, v, "FullWeighting", "Linear", "VC");
+    Solver.SetRS(RS);
+    Solver.Solve();
     return 0;
 }

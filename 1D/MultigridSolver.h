@@ -31,10 +31,6 @@ private:
     std::vector<double> _v;
     /// the Dirichlet condition
     double _u0, _u1;
-    /// the tolerance
-    double _tol;
-    /// the upper limit of iteration steps
-    int _maxstep;
     /// the level where MG is proceeding now
     int _nowlevel = 1;
     /// the pointer of restriction operator
@@ -49,6 +45,8 @@ private:
     int _RlxTimes = 10;
     /// the keywords of cycle type
     std::string _TypeofCycle;
+    /// the real solution
+    std::vector<double> _RS;
     
 
 public:
@@ -59,10 +57,6 @@ public:
      * @param n the total numbers of level
      * @param f the vector which stores the rightside of each level
      * @param v the vector which stores the approximate solution of each level
-     * @param u0 the left boundary condition
-     * @param u1 the right boundary condition
-     * @param tol 
-     * @param maxstep 
      * @param S1 the keywords of restriction operator type, 
      *           "FullWeighting" or "Injection"
      * @param S2 the keywords of interpolation operator type,
@@ -70,26 +64,25 @@ public:
      * @param S3 the keywords of cycle type
      *           "VC" or "FMG"
      */
-    MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0 = 0, double u1 = 0, double tol = 1e-6, int maxstep = 30, std::string S1 = "FullWeighting", std::string S2 = "Linear", std::string S3 = "VC");
+    MultigridSolver(int n, std::vector<double> f, std::vector<double> v, std::string S1 = "FullWeighting", std::string S2 = "Linear", std::string S3 = "VC");
     void SetGridLevel(int n);
     void SetRightSide(std::vector<double> f);
     void SetInitialGuess(std::vector<double> v);
     void SetBoundaryCond(double u0, double u1);
-    void SetTolerance(double tol);
-    void SetMaxStep(int maxstep);
     void SetRestrictionType(std::string S);
     void SetNowLevel(int nowlevel);
+    void SetRS(std::vector<double> RS);
     void PrintInfo();
     RestrictionOperator* pRestrictOP();
     InterpolationOperator* pInterpolateOP();
     void UpdateIndex();
-    void PrintIdx();
     void WeightedJacobi();
     void BottomSolve(double u0, double u1);
     void VCycle(int StartLevel);
     void FMG();
     void Solve();
     std::vector<double> ReturnSolution();
+    double RE_2Norm();
     
 
     

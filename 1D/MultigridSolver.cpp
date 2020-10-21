@@ -10,7 +10,7 @@
 
 #include "MultigridSolver.h"
 
-MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<double> v, double u0, double u1, double tol, int maxstep, std::string S1, std::string S2, std::string S3)
+MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<double> v, std::string S1, std::string S2, std::string S3)
 {
     _n = n;
     _h = 1.0/pow(2, _n);
@@ -30,10 +30,8 @@ MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<doubl
     }
     _v = std::vector<double>(total_length - solution_length, 0);
     _v.insert(_v.end(), v.begin(), v.end());
-    _u0 = u0;
-    _u1 = u1;
-    _tol = tol;
-    _maxstep = maxstep;
+    _u0 = *v.begin();
+    _u1 = *(v.end()-1);
     _nowlevel = 1;
     if (S1 == "FullWeighting")
     {
@@ -90,16 +88,6 @@ void MultigridSolver::SetBoundaryCond(double u0, double u1)
     _u1 = u1;
 }
 
-void MultigridSolver::SetTolerance(double tol)
-{
-    _tol = tol;
-}
-
-void MultigridSolver::SetMaxStep(int maxstep)
-{
-    _maxstep = maxstep;
-}
-
 void MultigridSolver::SetRestrictionType(std::string S)
 {
     if (S == "FullWeighting")
@@ -117,13 +105,16 @@ void MultigridSolver::SetNowLevel(int nowlevel)
     _nowlevel = nowlevel;
 }
 
+void MultigridSolver::SetRS(std::vector<double> RS)
+{
+    _RS = RS;
+}
+
 void MultigridSolver::PrintInfo()
 {
     std::cout << "The total level: " << _n << std::endl;
     std::cout << "The length of f, v:" << _f.size() << " " << _v.size() << std::endl;
     std::cout << "The boundary condition: " << _u0 << " " << _u1 << std::endl;
-    std::cout << "The tolerance: " << _tol << std::endl;
-    std::cout << "The upper limit of iteration steps: " << _maxstep << std::endl;
     _pRestrictOP -> PrintType();
     _pInterpolateOP->PrintType();
 }
@@ -144,9 +135,17 @@ void MultigridSolver::UpdateIndex()
     _Idx[1] = _Idx[0] + (int)(pow(2, _n - _nowlevel + 1));
     _h = 1 / pow(2, _n - _nowlevel + 1);
 }
-void MultigridSolver::PrintIdx()
+
+double MultigridSolver::RE_2Norm()
 {
-    std::cout << _Idx[0] << " " << _Idx[1] << std::endl;
+    double RSNorm = 0;
+    double eNorm = 0;
+    for (int i = 0; i < _RS.size(); i++)
+    {
+	RSNorm = RSNorm + pow(_RS[i], 2);
+	eNorm = eNorm + pow(_RS[i] - _v[_Idx[0]+i], 2);
+    }
+    return sqrt(eNorm)/sqrt(RSNorm);
 }
 
 void MultigridSolver::WeightedJacobi()
@@ -215,22 +214,25 @@ void MultigridSolver::BottomSolve(double u0, double u1)
 void MultigridSolver::Solve()
 {
     UpdateIndex();
-    std::vector<double> all0(_Idx[0], 0);
-    for (int i = 0; i < 10; i++)
+    if (_TypeofCycle == "VC")
     {
-	_v.erase(_v.begin(), _v.begin()+_Idx[0]);
-	_v.insert(_v.begin(), all0.begin(), all0.end());
-	_v[_Idx[0]] = _u0;
-	_v[_Idx[1]] = _u1;
-	_f.erase(_f.begin(), _f.begin()+_Idx[0]);
-	_f.insert(_f.begin(), all0.begin(), all0.end());
-	VCycle(1);
-	double e = 0;
-	int a = (int)pow(2, _n);
-	for (int i = 0; i <= a; i++)
-	    ///e = e + pow((_v[i+_Idx[0]] - sin(PI * i * _h)), 2);
-	    e = e + pow((_v[i+_Idx[0]] - exp(sin(i * _h))), 2);
-	std::cout << sqrt(e) << std::endl;
+	std::vector<double> all0(_Idx[0], 0);
+	for (int i = 0; i < 10; i++)
+	{
+	    _v.erase(_v.begin(), _v.begin()+_Idx[0]);
+	    _v.insert(_v.begin(), all0.begin(), all0.end());
+	    _v[_Idx[0]] = _u0;
+	    _v[_Idx[1]] = _u1;
+	    _f.erase(_f.begin(), _f.begin()+_Idx[0]);
+	    _f.insert(_f.begin(), all0.begin(), all0.end());
+	    VCycle(1);
+	    std::cout << "The iteration step: " << i+1 << ", the relative error: " << RE_2Norm() << std::endl;
+	}
+    }
+    else
+    {
+	FMG();
+	std::cout << "The relative error: " << RE_2Norm() << std::endl;
     }
 }
 
