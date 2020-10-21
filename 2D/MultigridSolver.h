@@ -31,14 +31,6 @@ private:
     std::vector<std::vector<double> > _f;
     /// the collection of approximate solution
     std::vector<std::vector<double> > _v;
-    /// the Dirichlet condition
-    /// while the nodes at corner belong to up and down boundary
-    /* std::vector<double> _u_up;
-    std::vector<double> _u_down;
-    std::vector<double> _u_right;
-    std::vector<double> _u_left;
-    std::vector<double> _uBoundary;
-    */
     /// the level where MG is proceeding now
     int _nowlevel = 1;
     /// the pointer of restriction operator
@@ -48,16 +40,21 @@ private:
     /// the weight of WeightedJacobi
     double _w = 2.0/3;
     /// the times of Relaxtion
-    int _RlxTimes = 3;
+    int _RlxTimes = 10;
     /// the keywords of cycle type
     std::string _TypeofCycle;
     /// the mark whether this node is boundary
     std::vector<int> _BndMark;
+    /// the bottom boundary condition
+    std::vector<double> _BtmBnd;
+    /// the real solution
+    std::vector<double> _RS;
 
 public:
     MultigridSolver();
     MultigridSolver(int n, std::vector<double> f, std::vector<double> v, std::string S1 = "FullWeighting", std::string S2 = "Linear", std::string S3 = "VC");
     std::vector<int> IsBoundary();
+    void SetRS(std::vector<double> RS);
     void UpdateData();
     int CortoIdx(int i, int j);
     void WeightedJacobi();
@@ -66,4 +63,5 @@ public:
     void Solve();
     void FMG();
     std::vector<double> ReturnSolution();
+    double RE_2norm();
 };

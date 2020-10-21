@@ -23,12 +23,20 @@ MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<doubl
     }
     _f[0] = f;
     _v[0] = v;
+    _BtmBnd.push_back(_v[0][0]);
+    _BtmBnd.push_back(_v[0][(_SdLen-1)/2]);
+    _BtmBnd.push_back(_v[0][_SdLen-1]);
+    _BtmBnd.push_back(_v[0][(_SdLen-1)/2*_SdLen]);
+    _BtmBnd.push_back(_v[0][(_SdLen-1)/2*_SdLen+_SdLen-1]);
+    _BtmBnd.push_back(_v[0][_SdLen*(_SdLen-1)]);
+    _BtmBnd.push_back(_v[0][_SdLen*_SdLen-1-(_SdLen-1)/2]);
+    _BtmBnd.push_back(_v[0][_SdLen*_SdLen-1]);
     _nowlevel = 1;
     if (S1 == "FullWeighting")
     {
         _pRestrictOP = new FullWeightingRestriction();
     }
-    else if (S2 == "Injection")
+    else if (S1 == "Injection")
     {
 	_pRestrictOP = new InjectionRestriction();
     }
@@ -38,6 +46,11 @@ MultigridSolver::MultigridSolver(int n, std::vector<double> f, std::vector<doubl
     }
     _w = 2.0/3;
     _TypeofCycle = S3;
+}
+
+void MultigridSolver::SetRS(std::vector<double> RS)
+{
+    _RS = RS;
 }
 
 int MultigridSolver::CortoIdx(int i, int j)
@@ -57,6 +70,18 @@ std::vector<int> MultigridSolver::IsBoundary()
 	BndFlag[size - i * _SdLen - 1] = 1;
     }
     return BndFlag;
+}
+
+double MultigridSolver::RE_2norm()
+{
+    double RSNorm = 0;
+    double eNorm = 0;
+    for (int i = 0; i < _RS.size(); i++)
+    {
+	RSNorm = RSNorm + pow(_RS[i],2);
+	eNorm = eNorm + pow(_RS[i] - _v[0][i], 2);
+    }
+    return sqrt(eNorm)/sqrt(RSNorm);
 }
 
 void MultigridSolver::UpdateData()
@@ -143,33 +168,58 @@ void MultigridSolver::VCycle(int StartLevel)
 void MultigridSolver::Solve()
 {
     UpdateData();
-    double RS = 0;
-    for (int i = 0; i < _SdLen; i++)
-	for (int j = 0; j < _SdLen; j++)
-	{
-	    int Idx = CortoIdx(i, j);
-	    RS = RS + pow(sin(PI*i*_h)*sin(PI*j*_h), 2);
-	}
-    RS = sqrt(RS);
-    for(int i = 0; i < 20; i++)
+    if (_TypeofCycle == "VC")
     {
-	for (int j = 1; j < _n; j++)
+	for(int i = 0; i < 10; i++)
 	{
-	    int length = (int)(pow(2, _n - j)) + 1;
-	    _f[j] = std::vector<double>(length * length, 0);
-	    _v[j] = std::vector<double>(length * length, 0);
-	}
-	VCycle(1);
-	double e = 0;
-	for (int a = 0; a < _SdLen; a++)
-	    for (int b = 0; b < _SdLen; b++)
+	    for (int j = 1; j < _n; j++)
 	    {
-		int Idx = CortoIdx(a, b);
-		e = e + pow((_v[0][Idx] - sin(PI*a*_h)*sin(PI*b*_h)), 2);
+		int length = (int)(pow(2, _n - j)) + 1;
+		_f[j] = std::vector<double>(length * length, 0);
+		_v[j] = std::vector<double>(length * length, 0);
 	    }
-	std::cout << sqrt(e) << std::endl;
+	    VCycle(1);
+	    if (!_RS.empty())
+		std::cout << "The iteration step: " << i+1 << ", the relative error: " << RE_2norm() << std::endl;
+	}
+    }
+    else
+    {
+	FMG();
+	if (!_RS.empty())
+	    std::cout << "the relative error: " << RE_2norm() << std::endl;
     }
 }
+
+void MultigridSolver::FMG()
+{
+    UpdateData();
+    if (_nowlevel == _n)
+	BottomSolve(_BtmBnd);
+    else
+    {
+	std::vector<double> f_h = _f[_nowlevel-1];
+	std::vector<double> f_2h;
+	_pRestrictOP->SetInput(f_h);
+	_pRestrictOP->SetSdLen(_SdLen);
+	_pRestrictOP->restrict();
+	f_2h = _pRestrictOP->ReturnOutput();
+	_nowlevel++;
+	UpdateData();
+	_f[_nowlevel-1] = f_2h;
+	FMG();
+	f_2h = _v[_nowlevel-1];
+	_pInterpolateOP->SetInput(f_2h);
+	_pInterpolateOP->SetSdLen(_SdLen);
+	_pInterpolateOP->interpolate();
+	f_h = _pInterpolateOP->ReturnOutput();
+	_nowlevel--;
+	UpdateData();
+	_v[_nowlevel-1] = f_h;
+	VCycle(_nowlevel);
+    }
+}
+
 
 std::vector<double> MultigridSolver::ReturnSolution()
 {
