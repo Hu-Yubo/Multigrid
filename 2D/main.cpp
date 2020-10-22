@@ -27,7 +27,7 @@ double _f(double x, double y)
 
 int main(int argc, char* argv[])
 {
-    int n = 9;
+    int n = 8;
     int SdLen = (int)(pow(2, n)) + 1;
     double h = 1.0 / (SdLen-1);
     int Size = SdLen * SdLen;
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 	    f[CtoI(i,j,SdLen)] = _f(i*h, j*h);
 	    RS[CtoI(i,j,SdLen)] = _u(i*h, j*h);
 	}
-    MultigridSolver Solver(n, f, v, "FullWeighting", "Linear", "VC");
+    MultigridSolver Solver(n, f, v, "FullWeighting", "Linear", "FMG");
     Solver.SetRS(RS);
     Solver.Solve();
     return 0;
