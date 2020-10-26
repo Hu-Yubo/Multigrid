@@ -172,6 +172,7 @@ void MultigridSolver::Solve()
     {
 	for(int i = 0; i < 10; i++)
 	{
+
 	    for (int j = 1; j < _n; j++)
 	    {
 		int length = (int)(pow(2, _n - j)) + 1;

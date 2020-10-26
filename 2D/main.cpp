@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 	    f[CtoI(i,j,SdLen)] = _f(i*h, j*h);
 	    RS[CtoI(i,j,SdLen)] = _u(i*h, j*h);
 	}
-    MultigridSolver Solver(n, f, v, "FullWeighting", "Linear", "VC");
+    MultigridSolver Solver(n, f, v, "FullWeighting", "Linear", "FMG");
     Solver.SetRS(RS);
     Solver.Solve();
     return 0;
