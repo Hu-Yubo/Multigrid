@@ -12,16 +12,16 @@
 #include <vector>
 #include <math.h>
 
+#define PI 4.0*atan(1.0)
+
 class Node
 {
 private:
     int _GlbIdx;
-    int _LocIdx;
     int _SdLen;
 public:
-    Node(int a, int b, int n){
+    Node(int a, int n){
 	_GlbIdx = a;
-	_LocIdx = b;
 	_SdLen = n;
     }
     /// Suppose the domain of this problem is [0,1]x[0,1]
@@ -33,7 +33,9 @@ public:
 class Element
 {
 private:
-    std::vector<Node> _Node(4);
+    std::vector<Node> _Node;
+    double _GaussPnt[4][2] = {{-1/sqrt(3), -1/sqrt(3)}, {1/sqrt(3), -1/sqrt(3)}, {1/sqrt(3), 1/sqrt(3)}, {-1/sqrt(3), 1/sqrt(3)}};
+    double _w[4] = {1, 1, 1, 1};
 
 public:
     Element(Node N1, Node N2, Node N3, Node N4);
@@ -42,4 +44,15 @@ public:
     };
     double phi(double xi, double eta, int i);
     double phi_xi(double xi, double eta, int i);
+    double phi_eta(double xi, double eta, int i);
+    double det_Jacobi(double xi, double eta);
+    double xi_x(double xi, double eta);
+    double xi_y(double xi, double eta);
+    double eta_x(double xi, double eta);
+    double eta_y(double xi, double eta);
+    double phi_x(double xi, double eta, int i);
+    double phi_y(double xi, double eta, int i);
+    double a_ij(int i, int j);
+    double f(double xi, double eta);
+    double rhs(int i);
 };
