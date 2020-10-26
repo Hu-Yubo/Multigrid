@@ -217,7 +217,16 @@ void MultigridSolver::FMG()
 	_nowlevel--;
 	UpdateData();
 	_v[_nowlevel-1] = f_h;
-	VCycle(_nowlevel);
+	for (int i = 0; i < 5; i++)
+	{
+	    for (int j = _nowlevel; j < _n; j++)
+	    {
+		int length = (int)(pow(2, _n - j)) + 1;
+		_f[j] = std::vector<double>(length * length, 0);
+		_v[j] = std::vector<double>(length * length, 0);
+	    }
+	    VCycle(_nowlevel);
+	}
     }
 }
 

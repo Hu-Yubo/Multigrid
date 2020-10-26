@@ -52,7 +52,7 @@ private:
 public:
     MultigridSolver();
     /** 
-     * the constructor of MultigridSolver
+     * @brief the constructor of MultigridSolver
      * 
      * @param n the total numbers of level
      * @param f the vector which stores the rightside of each level
@@ -75,13 +75,46 @@ public:
     void PrintInfo();
     RestrictionOperator* pRestrictOP();
     InterpolationOperator* pInterpolateOP();
+    /** 
+     * @brief Update private member _Idx and _h, which depend on _nowlevel
+     * 
+     */
     void UpdateIndex();
+    /** 
+     * @brief Use weighted-Jacobi method solve Av=f, the weight is _w
+     * 
+     */
     void WeightedJacobi();
+    /** 
+     * @brief Solve bottom equation directly 
+     * 
+     * @param u0 the right bound value
+     * @param u1 the left bound value
+     */
     void BottomSolve(double u0, double u1);
+    /** 
+     * @brief Do 1 round of VCycle from StartLevel
+     * 
+     * @param StartLevel 
+     */
     void VCycle(int StartLevel);
+    /** 
+     * @brief Use FullMultiGrid method
+     * 
+     */
     void FMG();
+    /** 
+     * @brief Solve possion equation by VC or FMG method, cout Relative Error if real solution exists
+     * 
+     */
     void Solve();
     std::vector<double> ReturnSolution();
+    /** 
+     * @brief Calculate relative error in 2 norm
+     * 
+     * 
+     * @return Relative error in 2 norm
+     */
     double RE_2Norm();
     
 

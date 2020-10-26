@@ -27,7 +27,7 @@ double _f(double x, double y)
 
 int main(int argc, char* argv[])
 {
-    int n = 9;
+    int n = 8;
     int SdLen = (int)(pow(2, n)) + 1;
     double h = 1.0 / (SdLen-1);
     int Size = SdLen * SdLen;
