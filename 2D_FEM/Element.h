@@ -25,23 +25,24 @@ public:
 	_SdLen = n;
     }
     /// Suppose the domain of this problem is [0,1]x[0,1]
-    double x();
-    double y();
+    double x() const;
+    double y() const;
+    int GlbIdx() const;
 };
 
 
 class Element
 {
 private:
+    double (*_func)(double, double);
     std::vector<Node> _Node;
     double _GaussPnt[4][2] = {{-1/sqrt(3), -1/sqrt(3)}, {1/sqrt(3), -1/sqrt(3)}, {1/sqrt(3), 1/sqrt(3)}, {-1/sqrt(3), 1/sqrt(3)}};
     double _w[4] = {1, 1, 1, 1};
 
 public:
+    Element();
+    Element(Node N1, Node N2, Node N3, Node N4, double(*f)(double, double));
     Element(Node N1, Node N2, Node N3, Node N4);
-    Element(std::vector<Node> NV){
-	_Node = NV;
-    };
     double phi(double xi, double eta, int i);
     double phi_xi(double xi, double eta, int i);
     double phi_eta(double xi, double eta, int i);
@@ -52,7 +53,7 @@ public:
     double eta_y(double xi, double eta);
     double phi_x(double xi, double eta, int i);
     double phi_y(double xi, double eta, int i);
-    double a_ij(int i, int j);
-    double f(double xi, double eta);
+    double a(int i, int j);
     double rhs(int i);
+    int NdIdx(int i);
 };
