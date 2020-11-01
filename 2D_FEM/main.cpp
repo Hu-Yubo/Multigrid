@@ -17,8 +17,10 @@ double f(double x, double y)
 
 int main(int argc, char* argv[])
 {
-    FEMSpace FE(5);
+    FEMSpace FE(2, f);
     FE.GenerateA();
     FE.PrintA();
+    FE.GenerateRhs();
+    FE.PrintRhs();
     return 0;
 }

@@ -216,7 +216,14 @@ void MultigridSolver::FMG()
 	f_h = _pInterpolateOP->ReturnOutput();
 	_nowlevel--;
 	UpdateData();
-	_v[_nowlevel-1] = f_h;
+	for (int i = 0; i < _v[_nowlevel-1].size(); i++)
+	{
+	    if (_BndMark[i] == 1)
+		ResetBnd(i);
+	    else
+		_v[_nowlevel-1][i] = f_h[i];
+		
+	}
 	for (int i = 0; i < 5; i++)
 	{
 	    for (int j = _nowlevel; j < _n; j++)
@@ -234,5 +241,13 @@ void MultigridSolver::FMG()
 std::vector<double> MultigridSolver::ReturnSolution()
 {
     return _v[0];
+}
+
+void MultigridSolver::ResetBnd(int i)
+{
+    int r = i / _SdLen;
+    int c = i % _SdLen;
+    int times =  (int)(pow(2, _nowlevel-1));
+    _v[_nowlevel-1][i] = _v[0][CortoIdx(r*times, c*times)];
 }
     

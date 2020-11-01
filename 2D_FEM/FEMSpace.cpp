@@ -16,7 +16,7 @@ FEMSpace::FEMSpace(int SdLen, double(*func)(double, double))
     _DIM = _SdLen * _SdLen;
     _NEle = (_SdLen - 1) * (_SdLen - 1);
     _A = StiffMat(_DIM);
-    _rhs = std::vector<double>(_DIM);
+    _rhs = std::vector<double>(_DIM, 0);
     _func = func;
     _BaseEle = Element();
 }
@@ -27,7 +27,7 @@ FEMSpace::FEMSpace(int SdLen)
     _DIM = _SdLen * _SdLen;
     _NEle = (_SdLen - 1) * (_SdLen - 1);
     _A = std::vector<std::map<int, double>>(_DIM);
-    _rhs = std::vector<double>(_DIM);
+    _rhs = std::vector<double>(_DIM, 0);
     _BaseEle = Element();
 }
 
@@ -69,5 +69,27 @@ void FEMSpace::PrintA()
 	    std::cout << it->first << " " << it->second << " ";
 	}
 	std::cout << std::endl;
+    }
+}
+
+void FEMSpace::GenerateRhs()
+{
+    /// traverse each element
+    for (int k = 0; k < _NEle; k++)
+    {
+	std::vector<int> Idx = NodeofEle(k);
+	_BaseEle = Element(Node(Idx[0], _SdLen), Node(Idx[1], _SdLen), Node(Idx[2], _SdLen), Node(Idx[3], _SdLen), _func);
+	for (int i = 1; i <= 4; i++)
+	{
+	    _rhs[_BaseEle.NdIdx(i)] += _BaseEle.rhs(i); 
+	}
+    }
+}
+
+void FEMSpace::PrintRhs()
+{
+    for (int i = 0; i < _rhs.size(); i++)
+    {
+	std::cout << _rhs[i] << std::endl;
     }
 }

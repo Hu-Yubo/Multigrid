@@ -17,17 +17,17 @@ int CtoI(int i, int j, int SdLen)
 
 double _u(double x, double y)
 {
-    return sin(PI * x) * sin(PI * y);
+    return cos(PI * x) * cos(PI * y);
 }
 
 double _f(double x, double y)
 {
-    return 2 * PI * PI *  sin(PI * x) * sin(PI * y);
+    return 2 * PI * PI *  cos(PI * x) * cos(PI * y);
 }
 
 int main(int argc, char* argv[])
 {
-    int n = 8;
+    int n = 10;
     int SdLen = (int)(pow(2, n)) + 1;
     double h = 1.0 / (SdLen-1);
     int Size = SdLen * SdLen;

@@ -64,4 +64,5 @@ public:
     void FMG();
     std::vector<double> ReturnSolution();
     double RE_2norm();
+    void ResetBnd(int i);
 };

@@ -11,6 +11,7 @@
 #include "Element.h"
 #include <map>
 
+/// Use std::map to store stiff matrix, idea by LSJ
 typedef std::vector<std::map<int, double>> StiffMat;
 
 class FEMSpace
@@ -39,4 +40,6 @@ public:
     std::vector<int> NodeofEle(int i);
     void GenerateA();
     void PrintA();
+    void GenerateRhs();
+    void PrintRhs();
 };
